@@ -7,6 +7,11 @@
 </head>
 <style>
 
+  h1 {
+    color: red;
+    font-family: monospace;
+  }
+
   .arc text {
     font: 10px sans-serif;
     text-anchor: middle;
@@ -16,97 +21,34 @@
     stroke: #fff;
   }
 
-  #chart svg {
+  .chart svg {
     height: 400px;
   }
 
+  .target {
+    width: 40%;
+    float: left;
+  }
+
+  .preview, .target-wrapper{
+    width: 100%; /* it must to have width & height to be exported to canvas*/
+    height: 600px;
+  }
+
+  .show {
+    display: block;
+  }
 
 </style>
 <body>
 
   <h1>Javascript Screenshot Test</h1>
-  <h2>Data for this graph</h2>
-  <div>
-    [
-      { 
-        "label": "One",
-        "value" : 29.765957771107
-      } , 
-      { 
-        "label": "Two",
-        "value" : 0
-      } , 
-      { 
-        "label": "Three",
-        "value" : 32.807804682612
-      } , 
-      { 
-        "label": "Four",
-        "value" : 196.45946739256
-      } , 
-      { 
-        "label": "Five",
-        "value" : 0.19434030906893
-      } , 
-      { 
-        "label": "Six",
-        "value" : 98.079782601442
-      } , 
-      { 
-        "label": "Seven",
-        "value" : 13.925743130903
-      } , 
-      { 
-        "label": "Eight",
-        "value" : 5.1387322875705
-      }
-    ];
-  </div>
-  <div id="chart">
-    <svg></svg>
-  </div>
-  <script src="https://d3js.org/d3.v3.min.js"></script>
-  <script src="node_modules/nvd3/build/nv.d3.min.js"></script>
-  <script>
-
-    //Regular pie chart example
-    nv.addGraph(function() {
-      var chart = nv.models.pieChart()
-          .x(function(d) { return d.label })
-          .y(function(d) { return d.value })
-          .showLabels(true);
-
-        d3.select("#chart svg")
-            .datum(exampleData())
-            .transition().duration(350)
-            .call(chart);
-
-      return chart;
-    });
-
-    //Donut chart example
-    nv.addGraph(function() {
-      var chart = nv.models.pieChart()
-          .x(function(d) { return d.label })
-          .y(function(d) { return d.value })
-          .showLabels(true)     //Display pie labels
-          .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
-          .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
-          .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
-          .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
-          ;
-
-        d3.select("#chart2 svg")
-            .datum(exampleData())
-            .transition().duration(350)
-            .call(chart);
-
-      return chart;
-    });
-
-    //Pie chart example data. Note how there is only a single array of key-value pairs.
-    function exampleData() {
-      return  [
+  <h2>HTML + nvd3 pie graph</h2>
+  <div class="target-wrapper">
+    <div class="target one">
+      <h2>Data for this graph</h2>
+      <div>
+        [
           { 
             "label": "One",
             "value" : 29.765957771107
@@ -140,8 +82,215 @@
             "value" : 5.1387322875705
           }
         ];
+      </div>
+      <div class="chart">
+        <svg></svg>
+      </div>
+
+    </div>
+    <div class="target two">
+      <h2>Data for this graph</h2>
+      <div>
+        [
+          { 
+            "label": "One",
+            "value" : 29.765957771107
+          } , 
+          { 
+            "label": "Two",
+            "value" : 0
+          } , 
+          { 
+            "label": "Three",
+            "value" : 32.807804682612
+          } , 
+          { 
+            "label": "Four",
+            "value" : 196.45946739256
+          } , 
+          { 
+            "label": "Five",
+            "value" : 0.19434030906893
+          } , 
+          { 
+            "label": "Six",
+            "value" : 98.079782601442
+          } , 
+          { 
+            "label": "Seven",
+            "value" : 13.925743130903
+          } , 
+          { 
+            "label": "Eight",
+            "value" : 5.1387322875705
+          }
+        ];
+      </div>
+      <div class="chart">
+        <svg></svg>
+      </div>
+
+    </div>
+
+  </div>
+
+  <h2>HTML + Canvas graphs</h2>
+  <div class="preview"></div>
+
+  <h2>Canvas screenshot</h2>
+  <div class="finalCanvas"></div>
+
+  <button id="download" onclick="downloadPdf()">download pdf</button>
+
+  <script src="node_modules/d3/d3.js"></script>
+  <script src="node_modules/nvd3/build/nv.d3.min.js"></script>
+  <script src="node_modules/html2canvas/dist/html2canvas.js"></script>
+  <script src="node_modules/jspdf/dist/jspdf.min.js"></script>
+
+  <script type="text/javascript" src="node_modules//canvg/rgbcolor.js"></script> 
+  <script type="text/javascript" src="node_modules//canvg/StackBlur.js"></script>
+  <script type="text/javascript" src="node_modules//canvg/canvg.js"></script>
+
+  <script>
+    function createGraph(parentSelector) {
+      //Regular pie chart example
+      nv.addGraph(function() {
+        var chart = nv.models.pieChart()
+            .x(function(d) { return d.label })
+            .y(function(d) { return d.value })
+            .showLabels(true);
+
+          d3.select(`${parentSelector} .target.one .chart svg`)
+              .datum(exampleData())
+              .transition().duration(350)
+              .call(chart);
+
+          d3.select(`${parentSelector} .target.two .chart svg`)
+              .datum(exampleData(true))
+              .transition().duration(350)
+              .call(chart);
+
+        return chart;
+      });
+
+      //Donut chart example
+      nv.addGraph(function() {
+        var chart = nv.models.pieChart()
+            .x(function(d) { return d.label })
+            .y(function(d) { return d.value })
+            .showLabels(true)     //Display pie labels
+            .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+            .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+            .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+            .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+            ;
+
+          d3.select("#chart2 svg")
+              .datum(exampleData())
+              .transition().duration(350)
+              .call(chart);
+
+        return chart;
+      });
+
+      //Pie chart example data. Note how there is only a single array of key-value pairs.
+      function exampleData(variation) {
+        return  [
+            { 
+              "label": "One",
+              "value" : variation?20:29.765957771107
+            } , 
+            { 
+              "label": "Two",
+              "value" : variation?9.765957771107:0
+            } , 
+            { 
+              "label": "Three",
+              "value" : 32.807804682612
+            } , 
+            { 
+              "label": "Four",
+              "value" : 196.45946739256
+            } , 
+            { 
+              "label": "Five",
+              "value" : 0.19434030906893
+            } , 
+            { 
+              "label": "Six",
+              "value" : 98.079782601442
+            } , 
+            { 
+              "label": "Seven",
+              "value" : 13.925743130903
+            } , 
+            { 
+              "label": "Eight",
+              "value" : 5.1387322875705
+            }
+          ];
+      }
     }
 
+    function convertTargetSvgsToCanvas() {
+      var svgTags = document.querySelectorAll('.target-wrapper .target svg');
+      var previewSvgTags = document.querySelectorAll('.preview svg');
+      for (var i=0; i<svgTags.length; i++) {
+        var svgTag = svgTags[i];
+        var previewSvgTag = previewSvgTags[i];
+        var c = document.createElement('canvas');
+        c.width = svgTag.clientWidth;
+        c.height = svgTag.clientHeight;
+        previewSvgTag.parentNode.insertBefore(c, previewSvgTag);
+        previewSvgTag.parentNode.removeChild(previewSvgTag);
+        var div = document.createElement('div');
+        var clonedSvg = svgTag.cloneNode(true);
+        div.appendChild(clonedSvg);
+        canvg(c, div.innerHTML);
+      }
+
+      //load '../path/to/your.svg' in the canvas with id = 'canvas'
+      // setTimeout( () => {
+      //   debugger;
+      //   canvg();
+      // }, 2000);
+
+    }
+
+    function downloadPdf() {
+      // only jpeg is supported by jsPDF
+      var canvas = document.querySelector('.finalCanvas canvas');
+      var canvasRatio = canvas.width/canvas.height;
+      var imgData = canvas.toDataURL("image/png");
+      var pdf = new jsPDF('l', 'mm', 'a4');
+      var width = pdf.internal.pageSize.width;    
+      var height = pdf.internal.pageSize.width/canvasRatio;
+
+      pdf.addImage(imgData, 'PNG', 10, 10, width, height);
+
+      pdf.save("download.pdf");
+    }
+  </script>
+  <script>
+    window.onload = function() {
+      var target = document.querySelector('.target-wrapper');
+      var preview = document.querySelector('.preview');
+
+      createGraph('.target-wrapper');
+      preview.innerHTML = target.innerHTML;
+
+      setTimeout( () => {
+        convertTargetSvgsToCanvas();
+      }, 2000)
+
+      
+      setTimeout( () => {
+        // html target element must have height
+        html2canvas(document.querySelector('.preview')).then(function(canvas) {
+          document.querySelector('.finalCanvas').appendChild(canvas);
+        });
+      }, 3000)
+    }
   </script>
 </body>
 </html>
